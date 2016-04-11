@@ -14,7 +14,8 @@ fi
 
 if [ ! -e ${PROJECT}/www/include/lib_uuid.php ]
 then
-    echo "lib_logstash depends on lib_uuid, please install that first"
+    echo "lib_logstash depends on lib_uuid, please install that first from the flamework/extras folder"
+    echo "https://github.com/whosonfirst/flamework"
     exit 1
 fi
 
