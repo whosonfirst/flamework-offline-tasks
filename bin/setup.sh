@@ -12,10 +12,10 @@ then
     exit 1
 fi
 
-if [ ! -e ${PROJECT}/www/include/lib_uuid.php ]
+if [ ! -e ${PROJECT}/www/include/lib_elasticsearch.php ]
 then
-    echo "lib_logstash depends on lib_uuid, please install that first from the flamework/extras folder"
-    echo "https://github.com/whosonfirst/flamework"
+    echo "lib_logstash depends on lib_redis, please install that first"
+    echo "https://github.com/whosonfirst/flamework-elasticsearch"
     exit 1
 fi
 
@@ -27,6 +27,7 @@ then
 fi
 
 cp ${ROOT}/www/include/lib_offline_tasks.php ${PROJECT}/www/include/
+cp ${ROOT}/www/include/lib_offline_tasks_search.php ${PROJECT}/www/include/
 
 if [ ! -e ${PROJECT}/www/include/lib_offline_tasks_do.php ]
 then

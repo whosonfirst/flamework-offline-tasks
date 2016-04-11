@@ -5,12 +5,8 @@
 
 	$GLOBALS['offline_tasks_hooks'] = array(
 		'schedule' => null,
+		'execute' => null,
 	);
-
-	$GLOBALS['offline_tasks_handlers'] = array();
-
-	# TO DO: don't require logstash and just push stuff to ... error_log if
-	# absent? (20160411/thisisaaronland)
 
 	########################################################################
 
@@ -27,43 +23,43 @@
 		}
 
 		if (! offline_tasks_is_valid_task($task)){
-			return array('ok' => 0, 'error' => 'invalid task');
+			dbug($GLOBALS['offline_tasks_handlers_do']);
+			return array('ok' => 0, 'error' => 'invalid task: ' . $task);
 		}
 
-		$uuid = uuid_v4();
-		$data['uuid'] = $uuid;
+		$task_id = uuid_v4();
 
 		$rsp = call_user_func($hook, $data);
 
 		$event = array(
-			'type' => 'schedule',
+			'action' => 'schedule',
+			'task_id' => $task_id,
 			'task' => $task,
-			'id' => $uuid,
 			'rsp' => $rsp,
 		);
 
 		logstash_publish('offline_tasks', $event);
 
-		return $rsp;		
+		return $rsp;
 	}
 
 	########################################################################
 
 	function offline_tasks_execute_task($task, $data){
 
-		$uuid = $data['uuid'];
+		$task_id = $data['task_id'];
 
 		$event = array(
-			'type' => 'execute',
+			'action' => 'exectute'
 			'task' => $task,
-			'id' => $uuid,
+			'task_id' => $task_id,
 			'rsp' => $rsp,
 		);
 
-		$func = offline_tasks_function_name($task);
+		$func = offline_tasks_do_function_name($task);
 
 		if (! function_exists($func)){
-			$rsp = array("ok" => 0, "error" => "missing handler for {$task}");	
+			$rsp = array("ok" => 0, "error" => "missing handler for {$task}");
 		}
 
 		else {
@@ -71,32 +67,7 @@
 		}
 
 		logstash_publish('offline_tasks', $event);
-		return $rsp;		
-	}
-
-	########################################################################
-
-	function offline_tasks_is_valid_task($task){
-
-		if (! isset($GLOBALS['offline_tasks_handlers'][$task])){
-			return 0;		
-		}
-
-		$func = offline_tasks_function_name($task);
-
-		if (! function_exists($func)){
-			return 0;
-		}
-
-		return 1;
-	}
-
-	########################################################################
-
-	function offline_tasks_function_name($task){
-
-		$func = "offline_tasks_do_{$task}";
-		return $func;
+		return $rsp;
 	}
 
 	########################################################################
